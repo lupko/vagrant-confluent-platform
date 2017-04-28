@@ -32,11 +32,11 @@
 # ===Install key, repository and confluent platform===
 # Debian
 - name: Install key for confluent repository
-  apt_key: state=present url=http://packages.confluent.io/deb/3.0/archive.key
+  apt_key: state=present url=http://packages.confluent.io/deb/3.2/archive.key
   when: ansible_os_family == 'Debian'
 
 - name: Install confluent repo
-  apt_repository: repo="deb [arch=amd64] http://packages.confluent.io/deb/3.0 stable main" state=present
+  apt_repository: repo="deb [arch=amd64] http://packages.confluent.io/deb/3.2 stable main" state=present
   when: ansible_os_family == 'Debian'
 
 - name: Install confluent platform
@@ -45,7 +45,7 @@
 
 # RedHat
 - name: Install key for confluent repository
-  rpm_key:  state=present key=http://packages.confluent.io/deb/3.0/archive.key
+  rpm_key:  state=present key=http://packages.confluent.io/deb/3.2/archive.key
   when: ansible_os_family == 'RedHat'
 
 - name: Install confluent repo
@@ -74,6 +74,8 @@
     - { src: "kafka.service.j2", dest: "/etc/systemd/system/kafka.service", owner: "root" }
     - { src: "schemaregistry.service.j2", dest: "/etc/systemd/system/schemaregistry.service", owner: "root" }
     - { src: "confluent-control-center.service.j2", dest: "/etc/systemd/system/confluent-control-center.service", owner: "root" }
+    - { src: "kafka-rest.service.j2", dest: "/etc/systemd/system/kafka-rest.service", owner: "root" }
+    - { src: "kafka-connect-distributed.service.j2", dest: "/etc/systemd/system/kafka-connect-distributed.service", owner: "root" }
   notify:
     reload systemd
 
@@ -82,9 +84,14 @@
   with_items:
   - { src: "server.properties.j2", dest: "/etc/kafka/server.properties", owner: "confluent" }
   - { src: "log4j.properties.j2", dest: "/etc/kafka/log4j.properties", owner: "confluent" }
+  - { src: "kafka-rest.log4j.properties.j2", dest: "/etc/kafka-rest/log4j.properties", owner: "confluent" }
+  - { src: "kafka-connect-log4j.properties.j2", dest: "/etc/kafka/connect-log4j.properties", owner: "confluent" }
+  - { src: "kafka-connect-distributed.properties.j2", dest: "/etc/kafka/connect-distributed.properties", owner: "confluent" }
+  - { src: "control-center.properties.j2", dest: "/etc/confluent-control-center/control-center.properties", owner: "confluent" }
+  - { src: "control-center-log4j.properties.j2", dest: "/etc/confluent-control-center/log4j.properties", owner: "confluent" }
 
-- name: Template config files for confluent control center
-  template: src="control-center.properties.j2" dest="/etc/confluent-control-center/control-center.properties" owner="confluent" group="confluent" mode=0755
+#- name: Template config files for confluent control center
+#  template: src="control-center.properties.j2" dest="/etc/confluent-control-center/control-center.properties" owner="confluent" group="confluent" mode=0755
 
 - name: Template config files for schema registry
   template: src="schema-registry.properties.j2" dest="/etc/schema-registry/schema-registry.properties" owner="confluent" group="confluent" mode=0755
@@ -113,6 +120,18 @@
 
 - name: Wait for Schema Registry to come up
   wait_for: port=8081 delay=2
+
+- name: Start Kafka REST
+  service: name=kafka-rest.service state=started enabled=yes
+
+- name: Wait for Kafka REST
+  wait_for: port=8082 delay=2
+
+- name: Start Kafka Connect Distributed workers
+  service: name=kafka-connect-distributed.service state=started enabled=yes
+
+- name: Wait for Kafka Connect Distributed workers
+  wait_for: port=8083 delay=2
 
 - name: Start Confluent Control Center
   service: name=confluent-control-center.service state=started enabled=yes

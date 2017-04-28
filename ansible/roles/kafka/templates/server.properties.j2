@@ -124,3 +124,11 @@ zookeeper.connect=localhost:2181
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms=6000
 delete.topic.enable=true
+
+# Monitoring
+metric.reporters=io.confluent.metrics.reporter.ConfluentMetricsReporter
+confluent.metrics.reporter.bootstrap.servers=localhost:9092
+confluent.metrics.reporter.zookeeper.connect=localhost:2181
+confluent.metrics.reporter.topic.replicas=1
+
+

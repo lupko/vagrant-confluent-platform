@@ -1,0 +1,15 @@
+[Unit]
+Description=Kafka REST Proxy
+Before=
+Requires=kafka.service
+After=network.target
+
+[Service]
+User=confluent
+ExecStart=/usr/bin/kafka-rest-start
+ExecStop=/usr/bin/kafka-rest-stop
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

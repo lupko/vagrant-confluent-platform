@@ -2,3 +2,4 @@
 .idea/**
 *.retry
 *.log
+.vagrant/**

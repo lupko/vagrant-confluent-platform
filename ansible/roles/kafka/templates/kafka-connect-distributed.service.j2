@@ -1,0 +1,15 @@
+[Unit]
+Description=Kafka Connect Distributed
+Before=
+Requires=kafka.service
+After=network.target
+
+[Service]
+User=confluent
+ExecStart=/usr/bin/connect-distributed /etc/kafka/connect-distributed.properties
+ExecStop=
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
