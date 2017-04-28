@@ -21,3 +21,9 @@ The following services are all bundled up and exposed to to host machine:
 To use simply clone the repository and run:
 
 `vagrant up`
+
+## Confluent Control Center
+
+Data Streams monitoring is available once there is at least one
+source and sink connector. See the `playground/01_basic` directory 
+for a simple example.
